@@ -1,0 +1,7 @@
+# ninja log v6
+4	274	7499462540854499	build.ninja	13ea3c9c88255aac
+364	487	7499462097124879	BoxOffHeuristica.exe	9e8e6aeed5134540
+2	362	7499462093509984	CMakeFiles/BoxOffHeuristica.dir/src/main.cpp.obj	4d240402c6e03788
+1	238	7499462540854499	build.ninja	13ea3c9c88255aac
+17	61	7499462541494500	CMakeFiles/BoxOffHeuristica.dir/src/board.cpp.obj	6e86e3371fad3b26
+61	143	7499462541934538	BoxOffHeuristica.exe	95849fac12f85c5a
