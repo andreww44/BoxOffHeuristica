@@ -4,8 +4,9 @@
 #include <vector>
 #include <unordered_set>
 #include <climits>
-#include <chrono>  // Para medir tiempo
-#include <sys/resource.h>  // Para medir uso de memoria
+#include <chrono> 
+#include <sys/resource.h>  
+
 using namespace std;
 
 const int FOUND = 1;
@@ -16,28 +17,32 @@ auto start_time = chrono::high_resolution_clock::now();  // Tiempo de inicio glo
 auto start_memory = rusage();  // Uso de memoria
 
 // Función para obtener el tiempo de ejecución en segundos
-double get_execution_time() {
+double get_execution_time() 
+{
     auto end_time = chrono::high_resolution_clock::now();
     chrono::duration<double> duration = end_time - start_time;
     return duration.count();
 }
 
 // Función para obtener el consumo de memoria (en bytes)
-size_t get_memory_usage() {
+size_t get_memory_usage() 
+{
     struct rusage usage;
     getrusage(RUSAGE_SELF, &usage);
     return usage.ru_maxrss;  // Retorna la memoria máxima usada (en kilobytes)
 }
 
 // operador de comparación de Nodo
-bool Node::operator==(const Node& other) const {
+bool Node::operator==(const Node& other) const 
+{
     return board[RED] == other.board[RED] && 
            board[BLUE] == other.board[BLUE] &&
            board[YELLOW] == other.board[YELLOW];
 }
 
 // operador de hash para Node
-size_t std::hash<Node>::operator()(const Node& node) const {
+size_t std::hash<Node>::operator()(const Node& node) const 
+{
     size_t h1 = std::hash<U64>{}(node.board[RED]);
     size_t h2 = std::hash<U64>{}(node.board[BLUE]);
     size_t h3 = std::hash<U64>{}(node.board[YELLOW]);
@@ -45,19 +50,22 @@ size_t std::hash<Node>::operator()(const Node& node) const {
 }
 
 // operador de comparación NodeAStar
-bool NodeAStar::operator==(const NodeAStar& other) const {
+bool NodeAStar::operator==(const NodeAStar& other) const 
+{
     return board[RED] == other.board[RED] && 
            board[BLUE] == other.board[BLUE] &&
            board[YELLOW] == other.board[YELLOW];
 }
 
 // operador de comparación mayor NodeAStar
-bool NodeAStar::operator>(const NodeAStar& other) const {
+bool NodeAStar::operator>(const NodeAStar& other) const 
+{
     return (depth + heuristic) > (other.depth + other.heuristic);
 }
 
 // operador de hash NodeAStar
-size_t std::hash<NodeAStar>::operator()(const NodeAStar& node) const {
+size_t std::hash<NodeAStar>::operator()(const NodeAStar& node) const 
+{
     size_t h1 = std::hash<U64>{}(node.board[RED]);
     size_t h2 = std::hash<U64>{}(node.board[BLUE]);
     size_t h3 = std::hash<U64>{}(node.board[YELLOW]);
@@ -65,15 +73,18 @@ size_t std::hash<NodeAStar>::operator()(const NodeAStar& node) const {
 }
 
 // heurística para A*
-int heuristic(const NodeAStar& node) {
+int heuristic(const NodeAStar& node) 
+{
     int remainingPieces = 0;
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) 
+    {
         remainingPieces += __builtin_popcountll(node.board[i]);
     }
     return remainingPieces;
 }
 
-bool bfs(Board& board) {
+bool bfs(Board& board) 
+{
     queue<Node> frontier;
     unordered_set<Node> explored;
     
@@ -83,25 +94,32 @@ bool bfs(Board& board) {
 
     int nodesExplored = 0;
 
-    while (!frontier.empty()) {
+    while (!frontier.empty()) 
+    {
         Node currentNode = frontier.front();
         frontier.pop();
         nodesExplored++;
 
         // Verificar si hemos alcanzado la solución (tablero vacío)
-        if ((currentNode.board[RED] | currentNode.board[BLUE] | currentNode.board[YELLOW]) == 0) {
+        if ((currentNode.board[RED] | currentNode.board[BLUE] | currentNode.board[YELLOW]) == 0) 
+        {
             cout << "Solución encontrada en " << currentNode.depth << " movimientos!" << endl;
             break;
         }
 
         // Generar los movimientos posibles y agregarlos a la cola
-        for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) {
-            for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; ++pos2) {
-                if (board.areSameColor(pos1, pos2) && board.isPathClear(pos1, pos2) && board.isRectangleClear(pos1, pos2)) {
+        for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) 
+        {
+            for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; ++pos2) 
+            {
+                if (board.areSameColor(pos1, pos2) && board.isPathClear(pos1, pos2) && board.isRectangleClear(pos1, pos2)) 
+                {
                     Node newNode = currentNode;
                     // Eliminar las fichas en las posiciones
-                    for (int i = 0; i < 3; i++) {
-                        if ((newNode.board[i] & (oneMask << pos1)) && (newNode.board[i] & (oneMask << pos2))) {
+                    for (int i = 0; i < 3; i++) 
+                    {
+                        if ((newNode.board[i] & (oneMask << pos1)) && (newNode.board[i] & (oneMask << pos2))) 
+                        {
                             newNode.board[i] &= ~(oneMask << pos1);
                             newNode.board[i] &= ~(oneMask << pos2);
                         }
@@ -109,7 +127,8 @@ bool bfs(Board& board) {
                     newNode.moves.push_back({pos1, pos2});
                     newNode.depth++;
 
-                    if (explored.find(newNode) == explored.end()) {
+                    if (explored.find(newNode) == explored.end()) 
+                    {
                         frontier.push(newNode);
                         explored.insert(newNode);
                     }
@@ -127,7 +146,8 @@ bool bfs(Board& board) {
     return true;
 }
 
-bool astar(Board& board) {
+bool astar(Board& board) 
+{
     priority_queue<NodeAStar, vector<NodeAStar>, greater<NodeAStar>> frontier;
     unordered_set<NodeAStar> explored;
 
@@ -137,24 +157,30 @@ bool astar(Board& board) {
 
     int nodesExplored = 0;
 
-    while (!frontier.empty()) {
+    while (!frontier.empty()) 
+    {
         NodeAStar currentNode = frontier.top();
         frontier.pop();
         nodesExplored++;
 
-        if ((currentNode.board[RED] | currentNode.board[BLUE] | currentNode.board[YELLOW]) == 0) {
+        if ((currentNode.board[RED] | currentNode.board[BLUE] | currentNode.board[YELLOW]) == 0) 
+        {
             cout << "Solución encontrada en " << currentNode.depth << " movimientos!" << endl;
             break;
         }
 
         // Generar los movimientos posibles y agregarlos a la cola
-        for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) {
-            for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; ++pos2) {
+        for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) 
+        {
+            for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; ++pos2) 
+            {
                 if (board.areSameColor(pos1, pos2) && board.isPathClear(pos1, pos2) && board.isRectangleClear(pos1, pos2)) {
                     NodeAStar newNode = currentNode;
                     // Eliminar las fichas en las posiciones
-                    for (int i = 0; i < 3; i++) {
-                        if ((newNode.board[i] & (oneMask << pos1)) && (newNode.board[i] & (oneMask << pos2))) {
+                    for (int i = 0; i < 3; i++) 
+                    {
+                        if ((newNode.board[i] & (oneMask << pos1)) && (newNode.board[i] & (oneMask << pos2))) 
+                        {
                             newNode.board[i] &= ~(oneMask << pos1);
                             newNode.board[i] &= ~(oneMask << pos2);
                         }
@@ -163,7 +189,8 @@ bool astar(Board& board) {
                     newNode.depth++;
                     newNode.heuristic = heuristic(newNode);
 
-                    if (explored.find(newNode) == explored.end()) {
+                    if (explored.find(newNode) == explored.end()) 
+                    {
                         frontier.push(newNode);
                         explored.insert(newNode);
                     }
@@ -181,7 +208,8 @@ bool astar(Board& board) {
     return true;
 }
 
-int search_ida(Board& board, NodeAStar startNode, int depth, int limit, int& nodesExplored) {
+int search_ida(Board& board, NodeAStar startNode, int depth, int limit, int& nodesExplored) 
+{
     // Si la profundidad actual es mayor que el límite, retornamos el valor de la profundidad como el nuevo límite
     if (depth > limit) return depth;
 
@@ -193,14 +221,17 @@ int search_ida(Board& board, NodeAStar startNode, int depth, int limit, int& nod
     int minCost = INT_MAX;  // Este valor llevará el mínimo costo encontrado
 
     // Generar todos los movimientos posibles (de manera similar a lo que ya haces en A*)
-    for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) {
-        for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; ++pos2) {
+    for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) 
+    {
+        for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; ++pos2) 
+        {
             // Verificamos si las fichas en las posiciones son del mismo color y si el camino está despejado
             if (board.areSameColor(pos1, pos2) && board.isPathClear(pos1, pos2) && board.isRectangleClear(pos1, pos2)) {
                 NodeAStar newNode = startNode;  // Usa NodeAStar en lugar de Node
 
                 // Realizamos el movimiento: eliminamos las piezas de las posiciones
-                for (int i = 0; i < 3; i++) {
+                for (int i = 0; i < 3; i++) 
+                {
                     if ((newNode.board[i] & (oneMask << pos1)) && (newNode.board[i] & (oneMask << pos2))) {
                         newNode.board[i] &= ~(oneMask << pos1);
                         newNode.board[i] &= ~(oneMask << pos2);
@@ -217,11 +248,13 @@ int search_ida(Board& board, NodeAStar startNode, int depth, int limit, int& nod
                 // Llamamos recursivamente a search_ida con la nueva configuración
                 int result = search_ida(board, newNode, depth + 1, limit, nodesExplored);
 
-                if (result == FOUND) {
+                if (result == FOUND) 
+                {
                     return FOUND;  // Si encontramos la solución, terminamos
                 }
 
-                if (result < minCost) {
+                if (result < minCost) 
+                {
                     minCost = result;  // Actualizamos el menor costo encontrado
                 }
             }
@@ -231,14 +264,22 @@ int search_ida(Board& board, NodeAStar startNode, int depth, int limit, int& nod
     return minCost;  // Retornamos el menor costo encontrado en este nivel
 }
 
-bool ida_star(Board& board) {
+bool ida_star(Board& board) 
+{
+    
+    auto start_time = chrono::high_resolution_clock::now();
+    getrusage(RUSAGE_SELF, &start_memory);                   
+
     NodeAStar startNode = {board.board[RED], board.board[BLUE], board.board[YELLOW], 0, heuristic(startNode), {}}; 
     int limit = heuristic(startNode);  
     int nodesExplored = 0;
 
-    while (true) {
-        int temp = search_ida(board, startNode, 0, limit, nodesExplored);  
-        if (temp == FOUND) {
+    while (true) 
+    {
+        int temp = search_ida(board, startNode, 0, limit, nodesExplored); 
+
+        if (temp == FOUND) 
+        {
             cout << "Solución encontrada." << endl;
             break;
         }
@@ -246,13 +287,20 @@ bool ida_star(Board& board) {
             cout << "No se encontró solución." << endl;
             return false;
         }
+
         limit = temp;  // Incrementa el límite de profundidad
     }
 
     double timeElapsed = get_execution_time();
+
     cout << "Tiempo total: " << timeElapsed << " segundos." << endl;
     cout << "Nodos explorados: " << nodesExplored << endl;
-    cout << "Nodos procesados por segundo: " << nodesExplored / timeElapsed << " nodos/seg." << endl;
+
+    if (timeElapsed > 0) 
+    { // Previene la división por cero
+        cout << "Nodos procesados por segundo: " << nodesExplored / timeElapsed << " nodos/seg." << endl;
+    }
+
     cout << "Memoria máxima utilizada: " << get_memory_usage() << " KB." << endl;
 
     return true;
