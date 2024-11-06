@@ -4,9 +4,9 @@
 
 Board::Board() {
     int i = 0;
-    board[RED] = 0x0000000000000000ULL;
-    board[BLUE] = 0x0000000000000000ULL;
-    board[YELLOW] = 0x0000000000000000ULL;
+    board[RED] = 0x0000242424244949ULL;
+    board[BLUE] = 0x0000929249499292ULL;
+    board[YELLOW] = 0x0000494992924444ULL;
     oneMask = 0x0000000000000001ULL;
     zero = 0x0000000000000000ULL;
     fullMask = (0x0000ffffffffffffULL);
@@ -15,14 +15,7 @@ Board::Board() {
     srand(time(NULL));
 
     // Colores aleatorios para el tablero.
-    while (i < BOARD_SIZE) {
-        int color = rand() % 3;
-        if (colors[color] < 16) {
-            board[color] |= (oneMask << i);
-            colors[color]++;
-            i++;
-        }
-    }
+    
 }
 
 Board::~Board() = default;
