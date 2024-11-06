@@ -1,8 +1,0 @@
-# ninja log v6
-1	238	7502707409369837	build.ninja	13ea3c9c88255aac
-61	143	7499462541934538	BoxOffHeuristica.exe	95849fac12f85c5a
-2	362	7499462093509984	CMakeFiles/BoxOffHeuristica.dir/src/main.cpp.obj	4d240402c6e03788
-17	61	7499462541494500	CMakeFiles/BoxOffHeuristica.dir/src/board.cpp.obj	6e86e3371fad3b26
-13	391	7502707428155239	CMakeFiles/BoxOffHeuristica.dir/src/main.cpp.obj	e26c9e7b640cfd2
-18	439	7502707428215243	CMakeFiles/BoxOffHeuristica.dir/src/board.cpp.obj	ec2b85dc2d1d7e04
-439	543	7502707432427972	BoxOffHeuristica.exe	5a5a3e6c834a84c0

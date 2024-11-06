@@ -1,0 +1,3 @@
+/mnt/c/Users/Das/Desktop/BoxOff/build/CMakeFiles/boxoff.dir
+/mnt/c/Users/Das/Desktop/BoxOff/build/CMakeFiles/edit_cache.dir
+/mnt/c/Users/Das/Desktop/BoxOff/build/CMakeFiles/rebuild_cache.dir

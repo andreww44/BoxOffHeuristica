@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/boxoff.dir/Board.cpp.o CMakeFiles/boxoff.dir/Algoritmos.cpp.o CMakeFiles/boxoff.dir/main.cpp.o -o boxoff

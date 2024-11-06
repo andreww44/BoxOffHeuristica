@@ -1,3 +1,0 @@
-C:/Users/monsa/OneDrive/Documentos/GitHub/BoxOffHeuristica/cmake-build-debug/CMakeFiles/BoxOffHeuristica.dir
-C:/Users/monsa/OneDrive/Documentos/GitHub/BoxOffHeuristica/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/monsa/OneDrive/Documentos/GitHub/BoxOffHeuristica/cmake-build-debug/CMakeFiles/rebuild_cache.dir
