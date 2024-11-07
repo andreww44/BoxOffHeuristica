@@ -6,6 +6,7 @@
 #include <climits>
 #include <chrono> 
 #include <sys/resource.h>  
+#include <string>
 
 using namespace std;
 
@@ -40,6 +41,32 @@ bool Node::operator==(const Node& other) const
            board[YELLOW] == other.board[YELLOW];
 }
 
+
+void NodeAStar::print(){
+    U64 rTable = board[RED];
+    U64 bTable = board[BLUE];
+    U64 yTable = board[YELLOW];
+
+    std::cout << "BoxOff" << std::endl;
+    for (int i = 0; i < Y; i++) {
+        for (int j = 0; j < X; j++) {
+            int pos = i * X + j;
+            if (rTable & (oneMask << pos)) {
+                std::cout << "R ";
+            }
+            else if (bTable & (oneMask << pos)) {
+                std::cout << "B ";
+            }
+            else if (yTable & (oneMask << pos)) {
+                std::cout << "Y ";
+            }
+            else {
+                std::cout << "* ";
+            }
+        }
+        std::cout << "\n";
+    }
+}
 // operador de hash para Node
 size_t std::hash<Node>::operator()(const Node& node) const 
 {
@@ -211,15 +238,22 @@ bool astar(Board& board)
 int search_ida(Board& board, NodeAStar startNode, int depth, int limit, int& nodesExplored) 
 {
     // Si la profundidad actual es mayor que el límite, retornamos el valor de la profundidad como el nuevo límite
-    if (depth > limit) return depth;
-
+    if (depth > limit) {
+        return depth;
+    }
     // Si hemos encontrado la solución (tablero vacío), retornamos FOUND
     if ((startNode.board[RED] | startNode.board[BLUE] | startNode.board[YELLOW]) == 0) {
+        std::cout<< "Hola" << std::endl;
         return FOUND;
     }
 
+    std::bitset<64> bits(startNode.board[RED]);
+    //std::cout << "Roj0 = " << bits << std::endl;
+    std::bitset<64> bits2(startNode.board[YELLOW]);
+    //std::cout << "Amar = "<< bits2 << std::endl;
+    std::bitset<64> bits3(startNode.board[BLUE]);
+    //std::cout << "Azul = "<< bits3 << std::endl;
     int minCost = INT_MAX;  // Este valor llevará el mínimo costo encontrado
-
     // Generar todos los movimientos posibles (de manera similar a lo que ya haces en A*)
     for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) 
     {
@@ -229,6 +263,8 @@ int search_ida(Board& board, NodeAStar startNode, int depth, int limit, int& nod
             if (board.areSameColor(pos1, pos2) && board.isPathClear(pos1, pos2) && board.isRectangleClear(pos1, pos2)) {
                 NodeAStar newNode = startNode;  // Usa NodeAStar en lugar de Node
 
+                startNode.print();
+                //std::cout<< pos1 << " + " << pos2 << std::endl;
                 // Realizamos el movimiento: eliminamos las piezas de las posiciones
                 for (int i = 0; i < 3; i++) 
                 {
@@ -260,18 +296,18 @@ int search_ida(Board& board, NodeAStar startNode, int depth, int limit, int& nod
             }
         }
     }
-
+    //std::cout<< "MinCost = " << minCost << std::endl;
     return minCost;  // Retornamos el menor costo encontrado en este nivel
 }
 
 bool ida_star(Board& board) 
 {
-    
     auto start_time = chrono::high_resolution_clock::now();
     getrusage(RUSAGE_SELF, &start_memory);                   
 
     NodeAStar startNode = {board.board[RED], board.board[BLUE], board.board[YELLOW], 0, heuristic(startNode), {}}; 
-    int limit = heuristic(startNode);  
+    int limit = heuristic(startNode);
+    std::cout<< "Limit = " << limit << std::endl;
     int nodesExplored = 0;
 
     while (true) 

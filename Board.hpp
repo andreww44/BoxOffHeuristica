@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <bitset>
 
 typedef uint64_t U64;
 
@@ -36,6 +37,7 @@ public:
     Board();    
     ~Board();    
     
+    void reset();
     void print();  // Imprime el estado del tablero.
     bool endGame();  // Verifica si el juego ha terminado.
     

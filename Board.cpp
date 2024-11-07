@@ -2,6 +2,7 @@
 #include <iostream>
 #include <ctime>
 
+
 Board::Board() {
     int i = 0;
     board[RED] = 0x0000242424244949ULL;
@@ -54,6 +55,12 @@ bool Board::isLegalMove(int position, DIR direction) {
     return false; 
 }
 
+void Board::reset(){
+    board[RED] = 0x0000242424244949ULL;
+    board[BLUE] = 0x0000929249499292ULL;
+    board[YELLOW] = 0x0000494992924444ULL;
+}
+
 void Board::print() {
     U64 rTable = board[RED];
     U64 bTable = board[BLUE];
@@ -81,6 +88,7 @@ void Board::print() {
 }
 
 bool Board::areSameColor(int pos1, int pos2) {
+    
     for (int i = 0; i < 3; i++) {
         if ((board[i] & (oneMask << pos1)) && (board[i] & (oneMask << pos2))) {
             return true;  

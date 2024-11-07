@@ -76,6 +76,7 @@ int main() {
         }
 
         // Mostrar el menú nuevamente después de completar un ciclo de búsqueda o juego normal
+        board.reset();
         printMenu();
         std::cin >> option;
     }

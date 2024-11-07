@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <vector>
 #include <iostream>
+#include <string>
 #include "Board.hpp"  // Asegúrate de que Board.hpp esté bien definido
 
 // Definición de un nodo en la búsqueda
@@ -32,6 +33,18 @@ struct NodeAStar {
 
     bool operator==(const NodeAStar& other) const;
     bool operator>(const NodeAStar& other) const;
+    
+    void print();
+
+    // Implementación de toString para crear una representación única del estado
+    std::string toString() const {
+        std::string result = "";
+        for (int i = 0; i < 3; ++i) {
+            result += std::to_string(board[i]) + "_";  // Convertir cada posición del tablero a string
+        }
+        result += std::to_string(depth);  // Agregar la profundidad para distinguir diferentes nodos con el mismo tablero
+        return result;
+    }
 };
 
 namespace std {
