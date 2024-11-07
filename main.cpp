@@ -9,8 +9,11 @@ void printMenu() {
     std::cout << "2. Usar BFS\n";
     std::cout << "3. Usar A*\n";
     std::cout << "4. Usar IDA*\n";
-    std::cout << "5. Salir\n";
-    std::cout << "Ingrese su opción (1-5): ";
+    std::cout << "5. Usar DFS\n";
+    std::cout << "6. Usar Dijkstra\n";
+    std::cout << "7. Usar WeightedA*\n";
+    std::cout << "8. Salir\n";
+    std::cout << "Ingrese su opción (1-8): ";
 }
 
 int main() {
@@ -19,7 +22,7 @@ int main() {
     printMenu();
     std::cin >> option;
 
-    while (option != 5) {
+    while (option != 8) {
         Board board;
         board.print();
 
@@ -72,6 +75,27 @@ int main() {
                 std::cout << "Solución encontrada con IDA*.\n";
             } else {
                 std::cout << "No se encontró solución con IDA*.\n";
+            }
+        } else if(option == 5){
+
+            if(start_dfs(board)){
+                std::cout << "Solución encontrada con DFS*.\n";
+            } else {
+                std::cout << "No se encontró solución con DFS*.\n";
+            }
+        } else if(option == 6){
+
+            if(Dijkstra(board)){
+                std::cout << "Solución encontrada con Dijsktra*.\n";
+            } else {
+                std::cout << "No se encontró solución con Dijkstra*.\n";
+            }
+        } else if(option == 7){
+
+            if(WeightedAStar(board, 3)){
+                std::cout << "Solución encontrada con WeightedA*.\n";
+            } else {
+                std::cout << "No se encontró solución con WeightedA*.\n";
             }
         }
 

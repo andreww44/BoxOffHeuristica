@@ -6,23 +6,30 @@
 #include <vector>
 #include <iostream>
 #include <string>
-#include "Board.hpp"  // Asegúrate de que Board.hpp esté bien definido
+#include <limits>
+#include "Board.hpp" 
+
 
 // Definición de un nodo en la búsqueda
 struct Node {
-    U64 board[3];  // Representación del tablero con bitboards
-    int depth;      // Profundidad (número de movimientos realizados)
-    std::vector<std::pair<int, int>> moves; // Lista de movimientos realizados (pares eliminados)
-
+    U64 board[3];  
+    int depth;     
+    std::vector<std::pair<int, int>> moves;
     bool operator==(const Node& other) const;
 };
 
-namespace std {
-    template <>
-    struct hash<Node> {
-        size_t operator()(const Node& node) const;
-    };
-}
+struct NodeDijkstra
+{
+    U64 board[3];
+    int cost; // Costo para llegar a este nodo desde el inicio
+    std::vector<int> path; // Para almacenar el camino o movimientos hechos
+
+    // Comparador para la cola de prioridad
+    bool operator==(const NodeDijkstra& other) const;
+    bool operator>(const NodeDijkstra& other) const;
+    void print();
+};
+
 
 // Definición de un nodo para A* (con heurística)
 struct NodeAStar {
@@ -30,23 +37,19 @@ struct NodeAStar {
     int depth;      // Profundidad (número de movimientos realizados)
     int heuristic;  // Heurística para la función A*
     std::vector<std::pair<int, int>> moves; // Lista de movimientos realizados
-
     bool operator==(const NodeAStar& other) const;
     bool operator>(const NodeAStar& other) const;
-    
-    void print();
-
-    // Implementación de toString para crear una representación única del estado
-    std::string toString() const {
-        std::string result = "";
-        for (int i = 0; i < 3; ++i) {
-            result += std::to_string(board[i]) + "_";  // Convertir cada posición del tablero a string
-        }
-        result += std::to_string(depth);  // Agregar la profundidad para distinguir diferentes nodos con el mismo tablero
-        return result;
-    }
+    void print();  //Para Debuggear NodeAStar
 };
 
+
+//Declaracion de HASH
+namespace std {
+    template <>
+    struct hash<Node> {
+        size_t operator()(const Node& node) const;
+    };
+}
 namespace std {
     template <>
     struct hash<NodeAStar> {
@@ -54,14 +57,38 @@ namespace std {
     };
 }
 
-// Declaraciones de funciones de búsqueda
-// Funciones de búsqueda y algoritmos
-bool bfs(Board& board);   // Búsqueda por amplitud (Breadth-First Search)
+// Definir un hash para NodeDijkstra
+namespace std {
+    template <>
+    struct hash<NodeDijkstra> {
+        size_t operator()(const NodeDijkstra& node) const {
+            size_t result = 0;
+            // Calculamos el hash de cada campo (usando uint64_t en lugar de int)
+            for (int i = 0; i < 3; ++i) {
+                result ^= std::hash<U64>{}(node.board[i]) + 0x9e3779b9 + (result << 6) + (result >> 2); // Técnica de hash común
+            }
+            result ^= std::hash<U64>{}(node.cost) + 0x9e3779b9 + (result << 6) + (result >> 2);
+            for (const auto& p : node.path) {
+                result ^= std::hash<int>{}(p) + 0x9e3779b9 + (result << 6) + (result >> 2);
+            }
+            return result;
+        }
+    };
+}
+
+bool bfs(Board& board);  //Búsqueda por amplitud (Breadth-First Search)
 int heuristic(const NodeAStar& node); // Heurística para A*
 bool astar(Board& board); // A* Search
 bool ida_star(Board& board); // IDA* Search
-
 int search_ida(Board& board, NodeAStar startNode, int depth, int limit, int& nodesExplored);
 
+bool dfs(Board& Board);
+bool start_dfs(Board& board);
+bool Dijkstra(Board& board);
+bool WeightedAStar(Board& board, double weight);
+bool JPS();
+bool BeamSearch(); //<- Juan
+bool RBFS(); //< - Juan
+bool SMAStar(); // <- Juan
 
 #endif // ALGORITMOS_HPP

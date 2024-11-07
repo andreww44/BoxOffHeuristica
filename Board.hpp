@@ -28,9 +28,6 @@ const int DIRECTIONS[8][2] = {
 
 class Board {
     
-   
-   
-
     bool isLegalMove(int position, DIR direction);  
 
 public:
@@ -46,6 +43,7 @@ public:
     bool isRectangleClear(int pos1, int pos2);  // Verifica si el rectángulo entre dos posiciones está libre.
     bool removePair(int pos1, int pos2);    // Elimina un par de piezas.
     bool hasValidMoves();
+    void restartBoard();
 
     U64 board[3]{};          // Representación de las piezas en el tablero.
     U64 oneMask{};           // Máscara para mover las piezas.

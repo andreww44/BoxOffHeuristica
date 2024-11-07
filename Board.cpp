@@ -21,6 +21,13 @@ Board::Board() {
 
 Board::~Board() = default;
 
+
+void Board::restartBoard(){
+    board[RED] = 0x0000242424244949ULL;
+    board[BLUE] = 0x0000929249499292ULL;
+    board[YELLOW] = 0x0000494992924444ULL;
+}
+
 bool Board::endGame() {
     // tablero vacio, el jugador gana.
     if ((board[RED] | board[BLUE] | board[YELLOW]) == zero) {

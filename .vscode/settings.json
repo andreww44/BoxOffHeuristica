@@ -66,6 +66,8 @@
         "xtr1common": "cpp",
         "xutility": "cpp",
         "bitset": "cpp",
-        "unordered_map": "cpp"
-    }
+        "unordered_map": "cpp",
+        "stack": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }
