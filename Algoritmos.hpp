@@ -87,8 +87,10 @@ bool start_dfs(Board& board);
 bool Dijkstra(Board& board);
 bool WeightedAStar(Board& board, double weight);
 bool JPS();
-bool BeamSearch(); //<- Juan
-bool RBFS(); //< - Juan
-bool SMAStar(); // <- Juan
 
+bool BeamSearch(Board& board, int beamWidth);
+int RBFS(Board& board, NodeAStar node, int fLimit, int& nodesExplored); 
+bool start_rbfs(Board& board);
+bool SMAStar(Board& board, int maxMemory); 
+//void print_results(int nodesExplored, std::chrono::high_resolution_clock::time_point start_time);
 #endif // ALGORITMOS_HPP

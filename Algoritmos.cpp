@@ -616,3 +616,254 @@ bool WeightedAStar(Board& board, double weight)
 
     return true;
 }
+
+bool BeamSearch(Board& board, int beamWidth) 
+{
+    priority_queue<NodeAStar, vector<NodeAStar>, greater<NodeAStar>> frontier;
+    unordered_set<NodeAStar> explored;
+    
+    NodeAStar startNode = {board.board[RED], board.board[BLUE], board.board[YELLOW], 0, heuristic(startNode), {}};
+    frontier.push(startNode);
+    explored.insert(startNode);
+
+    int nodesExplored = 0;
+    auto start_time = chrono::high_resolution_clock::now();
+    getrusage(RUSAGE_SELF, &start_memory);
+
+    while (!frontier.empty()) 
+    {
+        vector<NodeAStar> levelNodes;
+        for (int i = 0; i < beamWidth && !frontier.empty(); i++) 
+        {
+            levelNodes.push_back(frontier.top());
+            frontier.pop();
+        }
+
+        for (auto& currentNode : levelNodes) 
+        {
+            if ((currentNode.board[RED] | currentNode.board[BLUE] | currentNode.board[YELLOW]) == 0) 
+            {
+                cout << "Solución encontrada en " << currentNode.depth << " movimientos!" << endl;
+                auto end_time = high_resolution_clock::now();
+                auto duration = duration_cast<milliseconds>(end_time - start_time); // Tiempo en milisegundos
+                double duration_in_seconds = duration.count() / 1000.0;
+
+                cout << "Tiempo total: " << duration_in_seconds << " segundos." << endl;
+                cout << "Nodos explorados: " << nodesExplored << endl;
+                cout << "Nodos procesados por segundo: " << nodesExplored / duration_in_seconds << " nodos/seg." << endl;
+                cout << "Memoria máxima utilizada: " << get_memory_usage() << " KB." << endl;
+                //print_results(nodesExplored, start_time);
+                return true;
+            }
+            
+            nodesExplored++;
+            for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) 
+            {
+                for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; ++pos2) 
+                {
+                    if (board.areSameColor(pos1, pos2) && board.isPathClear(pos1, pos2) && board.isRectangleClear(pos1, pos2)) 
+                    {
+                        NodeAStar newNode = currentNode;
+                        for (int i = 0; i < 3; i++) 
+                        {
+                            if ((newNode.board[i] & (oneMask << pos1)) && (newNode.board[i] & (oneMask << pos2))) 
+                            {
+                                newNode.board[i] &= ~(oneMask << pos1);
+                                newNode.board[i] &= ~(oneMask << pos2);
+                            }
+                        }
+                        newNode.moves.push_back({pos1, pos2});
+                        newNode.depth++;
+                        newNode.heuristic = heuristic(newNode);
+                        
+                        if (explored.find(newNode) == explored.end()) 
+                        {
+                            frontier.push(newNode);
+                            explored.insert(newNode);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    auto end_time = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(end_time - start_time); // Tiempo en milisegundos
+    double duration_in_seconds = duration.count() / 1000.0;
+
+    cout << "Tiempo total: " << duration_in_seconds << " segundos." << endl;
+    cout << "Nodos explorados: " << nodesExplored << endl;
+    cout << "Nodos procesados por segundo: " << nodesExplored / duration_in_seconds << " nodos/seg." << endl;
+    cout << "Memoria máxima utilizada: " << get_memory_usage() << " KB." << endl;
+
+    cout << "No se encontró solución." << endl;
+
+    return false;
+}
+
+// Flag para activar las impresiones de depuración
+//bool debug_mode = true; // Puedes cambiar esto a false para desactivar las impresiones
+
+int RBFS(Board& board, NodeAStar node, int fLimit, int& nodesExplored) 
+{
+    if ((node.board[RED] | node.board[BLUE] | node.board[YELLOW]) == 0)
+     {
+        cout << "Solución encontrada en " << node.depth << " movimientos!" << endl;
+
+        auto end_time = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time); // Tiempo en milisegundos
+        double duration_in_seconds = duration.count() / 1000.0;
+
+        cout << "Tiempo total: " << duration_in_seconds << " segundos." << endl;
+        cout << "Nodos explorados: " << nodesExplored << endl;
+        cout << "Nodos procesados por segundo: " << nodesExplored / duration_in_seconds << " nodos/seg." << endl;
+        cout << "Memoria máxima utilizada: " << get_memory_usage() << " KB." << endl;
+
+        return FOUND; 
+    }
+
+    vector<NodeAStar> successors;
+    int iteration_count = 0;
+
+    for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) {
+        for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; ++pos2) 
+        {
+           /* if (debug_mode && iteration_count < 10) 
+            {  // Solo imprimir las primeras 10 iteraciones
+                cout << "Explorando posiciones: " << pos1 << " y " << pos2 << endl;
+            }*/
+
+            if (board.areSameColor(pos1, pos2) && board.isPathClear(pos1, pos2) && board.isRectangleClear(pos1, pos2)) 
+            {
+                NodeAStar newNode = node;
+
+                // Sin verificar límites, el índice siempre es válido
+                for (int i = 0; i < 3; i++) 
+                {
+                    if ((newNode.board[i] & (oneMask << pos1)) && (newNode.board[i] & (oneMask << pos2))) {
+                        newNode.board[i] &= ~(oneMask << pos1);
+                        newNode.board[i] &= ~(oneMask << pos2);
+                    }
+                }
+
+                newNode.depth++;
+                newNode.heuristic = heuristic(newNode);
+                cout << "Nodo creado con profundidad " << newNode.depth << " y heurística " << newNode.heuristic << endl;
+                successors.push_back(newNode);
+                nodesExplored++;
+            }
+            iteration_count++; // Incrementar el contador de iteraciones
+        }
+    }
+
+    if (successors.empty()) return INT_MAX;
+
+    for (auto& s : successors) 
+    {
+        s.heuristic = max(s.heuristic, node.heuristic);
+    }
+
+    while (true) 
+    {
+        sort(successors.begin(), successors.end(), greater<NodeAStar>());
+        NodeAStar best = successors.back();
+
+        if (best.heuristic > fLimit) return best.heuristic;
+
+        int alternative = successors.size() > 1 ? successors[successors.size() - 2].heuristic : INT_MAX;
+        int result = RBFS(board, best, min(fLimit, alternative), nodesExplored);
+
+        if (result == FOUND) return FOUND;
+
+        best.heuristic = result;
+    }
+}
+
+// Función para iniciar el RBFS
+bool start_rbfs(Board& board) {
+    NodeAStar startNode = {board.board[RED], board.board[BLUE], board.board[YELLOW], 0, heuristic(startNode), {}};
+    int nodesExplored = 0;
+    auto start_time = chrono::high_resolution_clock::now();
+
+    getrusage(RUSAGE_SELF, &start_memory);  // Asegúrate de que `start_memory` esté correctamente declarado
+
+    int result = RBFS(board, startNode, INT_MAX, nodesExplored);
+
+    return result == FOUND;
+}
+
+
+bool SMAStar(Board& board, int maxMemory) 
+{
+
+    priority_queue<NodeAStar, vector<NodeAStar>, greater<NodeAStar>> frontier;
+    unordered_map<NodeAStar, int> explored;
+    
+    NodeAStar startNode = {board.board[RED], board.board[BLUE], board.board[YELLOW], 0, heuristic(startNode), {}};
+    frontier.push(startNode);
+    explored[startNode] = startNode.heuristic;
+
+    int nodesExplored = 0;
+    auto start_time = chrono::high_resolution_clock::now();
+    getrusage(RUSAGE_SELF, &start_memory);
+
+    while (!frontier.empty()) 
+    {
+        if (frontier.size() > maxMemory) 
+        {
+            auto toRemove = frontier.top();
+            frontier.pop();
+            explored.erase(toRemove);
+        }
+        
+        NodeAStar currentNode = frontier.top();
+        frontier.pop();
+
+        if ((currentNode.board[RED] | currentNode.board[BLUE] | currentNode.board[YELLOW]) == 0) 
+        {
+            cout << "Solución encontrada en " << currentNode.depth << " movimientos!" << endl;
+            auto end_time = chrono::high_resolution_clock::now();
+            auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time); // Tiempo en milisegundos
+            double duration_in_seconds = duration.count() / 1000.0;
+
+            cout << "Tiempo total: " << duration_in_seconds << " segundos." << endl;
+            cout << "Nodos explorados: " << nodesExplored << endl;
+            cout << "Nodos procesados por segundo: " << nodesExplored / duration_in_seconds << " nodos/seg." << endl;
+            cout << "Memoria máxima utilizada: " << get_memory_usage() << " KB." << endl;
+
+            return true;
+        }
+
+        nodesExplored++;
+        for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) 
+        {
+            for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; ++pos2) 
+            {
+                if (board.areSameColor(pos1, pos2) && board.isPathClear(pos1, pos2) && board.isRectangleClear(pos1, pos2)) 
+                {
+                    NodeAStar newNode = currentNode;
+                    for (int i = 0; i < 3; i++) 
+                    {
+                        if ((newNode.board[i] & (oneMask << pos1)) && (newNode.board[i] & (oneMask << pos2))) 
+                        {
+                            newNode.board[i] &= ~(oneMask << pos1);
+                            newNode.board[i] &= ~(oneMask << pos2);
+                        }
+                    }
+                    newNode.depth++;
+                    newNode.heuristic = heuristic(newNode);
+
+                    if (explored.find(newNode) == explored.end() || explored[newNode] > newNode.heuristic) 
+                    {
+                        frontier.push(newNode);
+                        explored[newNode] = newNode.heuristic;
+                    }
+                }
+            }
+        }
+    }
+    cout << "No se encontró solución." << endl;
+
+    return false;
+}
+
