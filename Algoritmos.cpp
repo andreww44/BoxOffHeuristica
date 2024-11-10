@@ -586,18 +586,20 @@ bool WeightedAStar(Board& board, double weight)
                         }
                     }
                     newNode.moves.push_back({pos1, pos2});
-                    newNode.depth++;  // Incrementar el número de movimientos (g(n))
-
-                    // Calcular la heurística (h(n)) y ajustar la fórmula de f(n)
+                    newNode.depth++;  // Incrementar el número de movimientos
+                    
+                    // Calcular la heurística y ajustar la fórmula
                     newNode.heuristic = heuristic(newNode);
 
-                    // Aplicar el peso a la heurística
+                    //Aplicar el peso a la heurística
                     double weightedF = newNode.depth + weight * newNode.heuristic;
 
-                    // Usamos la fórmula ponderada para la función de coste
+                    //Usamos la fórmula ponderada para la función de costo
+
                     if (explored.find(newNode) == explored.end()) 
+                    //Insertamos el nodo con el valor 
+                    //ponderado de f(n) en la cola de prioridad
                     {
-                        // Insertamos el nodo con el valor ponderado de f(n) en la cola de prioridad
                         frontier.push(newNode);
                         explored.insert(newNode);
                     }
@@ -607,7 +609,7 @@ bool WeightedAStar(Board& board, double weight)
     }
 
     auto end_time = high_resolution_clock::now();
-    auto duration = duration_cast<milliseconds>(end_time - start_time); // Tiempo en milisegundos
+    auto duration = duration_cast<milliseconds>(end_time - start_time); //Tiempo en milisegundos
     double duration_in_seconds = duration.count() / 1000.0;
 
     cout << "Tiempo total: " << duration_in_seconds << " segundos." << endl;
@@ -618,22 +620,25 @@ bool WeightedAStar(Board& board, double weight)
     return true;
 }
 
+//Busca una solución usando un número limitado de mejores nodos en cada nivel (ancho de haz)
 bool BeamSearch(Board& board, int beamWidth) 
 {
-    priority_queue<NodeAStar, vector<NodeAStar>, greater<NodeAStar>> frontier;
-    unordered_set<NodeAStar> explored;
+    priority_queue<NodeAStar, vector<NodeAStar>, greater<NodeAStar>> frontier; //Cola de prioridad para los mejores nodos
+    unordered_set<NodeAStar> explored; //Guarda los nodos ya explorados
     
+    //Inicializa el nodo de inicio y lo agrega a la cola y al conjunto de explorados
     NodeAStar startNode = {board.board[RED], board.board[BLUE], board.board[YELLOW], 0, heuristic(startNode), {}};
     frontier.push(startNode);
     explored.insert(startNode);
 
-    int nodesExplored = 0;
-    auto start_time = chrono::high_resolution_clock::now();
-    getrusage(RUSAGE_SELF, &start_memory);
+    int nodesExplored = 0; //Contador de nodos explorados
+    auto start_time = chrono::high_resolution_clock::now(); //Tiempo de inicio
 
     while (!frontier.empty()) 
     {
-        vector<NodeAStar> levelNodes;
+        vector<NodeAStar> levelNodes; //Lista de nodos en el nivel actual
+
+        //Selecciona hasta beamWidth nodos de la cola para el nivel actual
         for (int i = 0; i < beamWidth && !frontier.empty(); i++) 
         {
             levelNodes.push_back(frontier.top());
@@ -642,33 +647,30 @@ bool BeamSearch(Board& board, int beamWidth)
 
         for (auto& currentNode : levelNodes) 
         {
+            //Si se encuentra una solución, imprime resultados y termina
             if ((currentNode.board[RED] | currentNode.board[BLUE] | currentNode.board[YELLOW]) == 0) 
             {
                 cout << "Solución encontrada en " << currentNode.depth << " movimientos!" << endl;
                 auto end_time = high_resolution_clock::now();
-                auto duration = duration_cast<milliseconds>(end_time - start_time); // Tiempo en milisegundos
+                auto duration = duration_cast<milliseconds>(end_time - start_time);
                 double duration_in_seconds = duration.count() / 1000.0;
 
                 cout << "Tiempo total: " << duration_in_seconds << " segundos." << endl;
                 cout << "Nodos explorados: " << nodesExplored << endl;
                 cout << "Nodos procesados por segundo: " << nodesExplored / duration_in_seconds << " nodos/seg." << endl;
                 cout << "Memoria máxima utilizada: " << get_memory_usage() << " KB." << endl;
-                //print_results(nodesExplored, start_time);
                 return true;
             }
             
-            nodesExplored++;
-            for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) 
-            {
-                for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; ++pos2) 
-                {
-                    if (board.areSameColor(pos1, pos2) && board.isPathClear(pos1, pos2) && board.isRectangleClear(pos1, pos2)) 
-                    {
+            nodesExplored++; //Incrementa el contador de nodos explorados
+
+            //Genera nodos sucesores si cumplen con las condiciones
+            for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) {
+                for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; ++pos2) {
+                    if (board.areSameColor(pos1, pos2) && board.isPathClear(pos1, pos2) && board.isRectangleClear(pos1, pos2)) {
                         NodeAStar newNode = currentNode;
-                        for (int i = 0; i < 3; i++) 
-                        {
-                            if ((newNode.board[i] & (oneMask << pos1)) && (newNode.board[i] & (oneMask << pos2))) 
-                            {
+                        for (int i = 0; i < 3; i++) {
+                            if ((newNode.board[i] & (oneMask << pos1)) && (newNode.board[i] & (oneMask << pos2))) {
                                 newNode.board[i] &= ~(oneMask << pos1);
                                 newNode.board[i] &= ~(oneMask << pos2);
                             }
@@ -677,8 +679,8 @@ bool BeamSearch(Board& board, int beamWidth)
                         newNode.depth++;
                         newNode.heuristic = heuristic(newNode);
                         
-                        if (explored.find(newNode) == explored.end()) 
-                        {
+                        //Agrega nuevos nodos a la cola y al conjunto de explorados
+                        if (explored.find(newNode) == explored.end()) {
                             frontier.push(newNode);
                             explored.insert(newNode);
                         }
@@ -688,8 +690,9 @@ bool BeamSearch(Board& board, int beamWidth)
         }
     }
 
+    //Si no se encuentra una solución, imprime resultados y termina
     auto end_time = high_resolution_clock::now();
-    auto duration = duration_cast<milliseconds>(end_time - start_time); // Tiempo en milisegundos
+    auto duration = duration_cast<milliseconds>(end_time - start_time);
     double duration_in_seconds = duration.count() / 1000.0;
 
     cout << "Tiempo total: " << duration_in_seconds << " segundos." << endl;
@@ -702,8 +705,10 @@ bool BeamSearch(Board& board, int beamWidth)
     return false;
 }
 
+//Conjunto que almacena los estados ya visitados en la búsqueda RBFS
 std::unordered_set<NodeAStar> visitedStatesRBFS;
 const int ALREADY_VISITED = -1;
+
 int RBFS(Board& board, NodeAStar node, int fLimit, int& nodesExplored) 
 {
     if ((node.board[RED] | node.board[BLUE] | node.board[YELLOW]) == 0)
@@ -712,7 +717,8 @@ int RBFS(Board& board, NodeAStar node, int fLimit, int& nodesExplored)
         return FOUND; 
     }
 
-    if (visitedStatesRBFS.count(node)) {
+    if (visitedStatesRBFS.count(node)) 
+    {
         return ALREADY_VISITED;  
     }
 
@@ -721,17 +727,19 @@ int RBFS(Board& board, NodeAStar node, int fLimit, int& nodesExplored)
     vector<NodeAStar> successors;
     int iteration_count = 0;
 
-    for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) {
+    for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) 
+    {
         for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; ++pos2) 
         {
             if (board.areSameColor(pos1, pos2) && board.isPathClear(pos1, pos2) && board.isRectangleClear(pos1, pos2)) 
             {
                 NodeAStar newNode = node;
 
-                // Sin verificar límites, el índice siempre es válido
+                //Sin verificar límites, el índice siempre es válido
                 for (int i = 0; i < 3; i++) 
                 {
-                    if ((newNode.board[i] & (oneMask << pos1)) && (newNode.board[i] & (oneMask << pos2))) {
+                    if ((newNode.board[i] & (oneMask << pos1)) && (newNode.board[i] & (oneMask << pos2))) 
+                    {
                         newNode.board[i] &= ~(oneMask << pos1);
                         newNode.board[i] &= ~(oneMask << pos2);
                     }
@@ -743,7 +751,7 @@ int RBFS(Board& board, NodeAStar node, int fLimit, int& nodesExplored)
                 successors.push_back(newNode);
                 nodesExplored++;
             }
-            iteration_count++; // Incrementar el contador de iteraciones
+            iteration_count++; //Incrementar el contador de iteraciones
         }
     }
 
@@ -766,9 +774,10 @@ int RBFS(Board& board, NodeAStar node, int fLimit, int& nodesExplored)
 
         if (result == FOUND) return FOUND;
 
-        if (result == ALREADY_VISITED) {
+        if (result == ALREADY_VISITED) 
+        {
             successors.pop_back();
-            if (successors.empty()) return INT_MAX;  // Si no quedan más sucesores, retornar INT_MAX
+            if (successors.empty()) return INT_MAX;  //Si no quedan más sucesores, retornar INT_MAX
             continue;
         }
 
@@ -776,19 +785,20 @@ int RBFS(Board& board, NodeAStar node, int fLimit, int& nodesExplored)
     }
 }
 
+//Función para iniciar la búsqueda RBFS
 bool start_rbfs(Board& board) {
     NodeAStar startNode = {board.board[RED], board.board[BLUE], board.board[YELLOW], 0, heuristic(startNode), {}};
     int nodesExplored = 0;
-    
 
+    //Obtiene el tiempo de inicio y la memoria utilizada al inicio
     getrusage(RUSAGE_SELF, &start_memory);
-
     auto start_time = chrono::high_resolution_clock::now();
-    
+
+    //Ejecuta la búsqueda RBFS
     int result = RBFS(board, startNode, INT_MAX, nodesExplored);
-    
+
+    //Calcula la duración total y muestra estadísticas
     auto end_time = chrono::high_resolution_clock::now();
-    
     auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
     double duration_in_seconds = duration.count() / 1000.0;
 
@@ -830,7 +840,7 @@ bool SMAStar(Board& board, int maxMemory)
         {
             cout << "Solución encontrada en " << currentNode.depth << " movimientos!" << endl;
             auto end_time = chrono::high_resolution_clock::now();
-            auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time); // Tiempo en milisegundos
+            auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time); //Tiempo en milisegundos
             double duration_in_seconds = duration.count() / 1000.0;
 
             cout << "Tiempo total: " << duration_in_seconds << " segundos." << endl;
@@ -873,4 +883,3 @@ bool SMAStar(Board& board, int maxMemory)
 
     return false;
 }
-
