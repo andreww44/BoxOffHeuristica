@@ -26,6 +26,8 @@ const int DIRECTIONS[8][2] = {
     {-1, -1}  // Diagonal izquierda-arriba
 };
 
+
+
 class Board {
     
     bool isLegalMove(int position, DIR direction);  
@@ -50,6 +52,10 @@ public:
     U64 winingBoard{};       // Máscara de ganador.
     U64 fullMask{};          // Máscara completa para el tablero.
     U64 zero{};              // Representación de cero.
+    
+        
+
+
 };
 
 #endif //BOARD_H

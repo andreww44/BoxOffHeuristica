@@ -1,4 +1,5 @@
 #include "Algoritmos.hpp"
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -286,7 +287,7 @@ bool astar(Board& board)
 }
 
 //Funcionando
-std::unordered_set<NodeAStar> visitedStates; //Guardamos los estados visitados ya que sin esto search_ida entra en bucle
+std::unordered_set<NodeAStar> visitedStates;
 int search_ida(Board& board, NodeAStar startNode, int depth, int limit, int& nodesExplored) 
 {
     if (depth > limit) {
@@ -701,26 +702,21 @@ bool BeamSearch(Board& board, int beamWidth)
     return false;
 }
 
-// Flag para activar las impresiones de depuración
-//bool debug_mode = true; // Puedes cambiar esto a false para desactivar las impresiones
-
+std::unordered_set<NodeAStar> visitedStatesRBFS;
+const int ALREADY_VISITED = -1;
 int RBFS(Board& board, NodeAStar node, int fLimit, int& nodesExplored) 
 {
     if ((node.board[RED] | node.board[BLUE] | node.board[YELLOW]) == 0)
-     {
-        cout << "Solución encontrada en " << node.depth << " movimientos!" << endl;
-
-        auto end_time = chrono::high_resolution_clock::now();
-        auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time); // Tiempo en milisegundos
-        double duration_in_seconds = duration.count() / 1000.0;
-
-        cout << "Tiempo total: " << duration_in_seconds << " segundos." << endl;
-        cout << "Nodos explorados: " << nodesExplored << endl;
-        cout << "Nodos procesados por segundo: " << nodesExplored / duration_in_seconds << " nodos/seg." << endl;
-        cout << "Memoria máxima utilizada: " << get_memory_usage() << " KB." << endl;
-
+    {
+        cout<< "Encontre"<< std::endl;
         return FOUND; 
     }
+
+    if (visitedStatesRBFS.count(node)) {
+        return ALREADY_VISITED;  
+    }
+
+    visitedStatesRBFS.insert(node);
 
     vector<NodeAStar> successors;
     int iteration_count = 0;
@@ -728,11 +724,6 @@ int RBFS(Board& board, NodeAStar node, int fLimit, int& nodesExplored)
     for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) {
         for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; ++pos2) 
         {
-           /* if (debug_mode && iteration_count < 10) 
-            {  // Solo imprimir las primeras 10 iteraciones
-                cout << "Explorando posiciones: " << pos1 << " y " << pos2 << endl;
-            }*/
-
             if (board.areSameColor(pos1, pos2) && board.isPathClear(pos1, pos2) && board.isRectangleClear(pos1, pos2)) 
             {
                 NodeAStar newNode = node;
@@ -775,23 +766,39 @@ int RBFS(Board& board, NodeAStar node, int fLimit, int& nodesExplored)
 
         if (result == FOUND) return FOUND;
 
+        if (result == ALREADY_VISITED) {
+            successors.pop_back();
+            if (successors.empty()) return INT_MAX;  // Si no quedan más sucesores, retornar INT_MAX
+            continue;
+        }
+
         best.heuristic = result;
     }
 }
 
-// Función para iniciar el RBFS
 bool start_rbfs(Board& board) {
     NodeAStar startNode = {board.board[RED], board.board[BLUE], board.board[YELLOW], 0, heuristic(startNode), {}};
     int nodesExplored = 0;
+    
+
+    getrusage(RUSAGE_SELF, &start_memory);
+
     auto start_time = chrono::high_resolution_clock::now();
-
-    getrusage(RUSAGE_SELF, &start_memory);  // Asegúrate de que `start_memory` esté correctamente declarado
-
+    
     int result = RBFS(board, startNode, INT_MAX, nodesExplored);
+    
+    auto end_time = chrono::high_resolution_clock::now();
+    
+    auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
+    double duration_in_seconds = duration.count() / 1000.0;
+
+    cout << "Tiempo total: " << duration_in_seconds << " segundos." << endl;
+    cout << "Nodos explorados: " << nodesExplored << endl;
+    cout << "Nodos procesados por segundo: " << nodesExplored / duration_in_seconds << " nodos/seg." << endl;
+    cout << "Memoria máxima utilizada: " << get_memory_usage() << " KB." << endl;
 
     return result == FOUND;
 }
-
 
 bool SMAStar(Board& board, int maxMemory) 
 {

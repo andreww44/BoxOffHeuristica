@@ -4,7 +4,7 @@
 #include "Algoritmos.hpp"
 
 void printMenu() {
-    std::cout << "Seleccione una opción:\n";
+    std::cout << "Seleccione un Algoritmo:\n";
     std::cout << "1. Jugar normalmente\n";
     std::cout << "2. Usar BFS\n";
     std::cout << "3. Usar A*\n";
@@ -22,13 +22,16 @@ void printMenu() {
 int main() {
     int option;
     std::cout << "Bienvenido al juego de eliminación de fichas!\n";
-    printMenu();
-    std::cin >> option;
-
+    //printMenu();
+    
     while (option != 11) 
     {
         Board board;
+        
+        board.restartBoard();
+        printMenu();
         board.print();
+        std::cin >> option;
 
         if (option == 1) 
         {
@@ -165,9 +168,7 @@ int main() {
     
 
         // Mostrar el menú nuevamente después de completar un ciclo de búsqueda o juego normal
-        board.reset();
-        printMenu();
-        std::cin >> option;
+        
     }
 
     std::cout << "Gracias por jugar. ¡Hasta la próxima!\n";

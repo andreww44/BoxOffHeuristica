@@ -22,7 +22,7 @@ struct NodeDijkstra
 {
     U64 board[3];
     int cost; // Costo para llegar a este nodo desde el inicio
-    std::vector<int> path; // Para almacenar el camino o movimientos hechos
+    std::vector<int> path; //Para almacenar el camino o movimientos hechos
 
     // Comparador para la cola de prioridad
     bool operator==(const NodeDijkstra& other) const;
