@@ -27,7 +27,7 @@ int main() {
     while (option != 11) 
     {
         Board board;
-        
+ 
         board.restartBoard();
         printMenu();
         board.print();

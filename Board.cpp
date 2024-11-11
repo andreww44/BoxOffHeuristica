@@ -4,7 +4,7 @@
 
 
 Board::Board() {
-   
+
     board[RED] = 0x0000000000000000ULL;
     board[BLUE] = 0x0000000000000000ULL;
     board[YELLOW] = 0x0000000000000000ULL;

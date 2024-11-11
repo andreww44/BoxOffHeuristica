@@ -812,7 +812,6 @@ bool start_rbfs(Board& board) {
 
 bool SMAStar(Board& board, int maxMemory) 
 {
-
     priority_queue<NodeAStar, vector<NodeAStar>, greater<NodeAStar>> frontier;
     unordered_map<NodeAStar, int> explored;
     
@@ -879,7 +878,16 @@ bool SMAStar(Board& board, int maxMemory)
             }
         }
     }
+
+    auto end_time = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time); 
+    double duration_in_seconds = duration.count() / 1000.0;
+
     cout << "No se encontró solución." << endl;
+    cout << "Tiempo total: " << duration_in_seconds << " segundos." << endl;
+    cout << "Nodos explorados: " << nodesExplored << endl;
+    cout << "Nodos procesados por segundo: " << nodesExplored / duration_in_seconds << " nodos/seg." << endl;
+    cout << "Memoria máxima utilizada: " << get_memory_usage() << " KB." << endl;
 
     return false;
 }
