@@ -82,10 +82,13 @@ int main() {
             }
         } 
 
-        else if (option == 3) 
+       else if (option == 3) 
         {
-            // Usar A*
-            if (astar(board)) {
+            int heuristic_type;
+            std::cout << "Seleccione la heurística para A* (1: Manhattan, 2: Euclidiana,3: Costo Uniforme): ";
+            std::cin >> heuristic_type;
+
+            if (astar(board, heuristic_type)) {
                 std::cout << "Solución encontrada con A*.\n";
             } else {
                 std::cout << "No se encontró solución con A*.\n";

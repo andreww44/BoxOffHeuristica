@@ -139,6 +139,65 @@ int heuristic(const NodeAStar& node)
     }
     return remainingPieces;
 }
+int heuristic_costoUniforme(const NodeAStar& node) 
+{
+    int remainingPieces = 0;
+    for (int i = 0; i < 3; i++) 
+    {
+        remainingPieces += __builtin_popcountll(node.board[i]);
+    }
+    return remainingPieces;
+}
+int heuristic_manhattan(const NodeAStar& node) {
+    int totalDistance = 0;
+
+    for (int color = 0; color < 3; color++) {
+        U64 pieces = node.board[color]; 
+        
+        for (int pos1 = 0; pos1 < BOARD_SIZE; pos1++) {
+            if (pieces & (oneMask << pos1)) { 
+                int x1 = pos1 % X;
+                int y1 = pos1 / X;
+
+                
+                for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; pos2++) {
+                    if (pieces & (oneMask << pos2)) {  
+                        int x2 = pos2 % X;
+                        int y2 = pos2 / X;
+                        totalDistance += abs(x1 - x2) + abs(y1 - y2);
+                    }
+                }
+            }
+        }
+    }
+
+    return totalDistance;
+}
+int heuristic_euclidean(const NodeAStar& node) {
+    int totalDistanceSquared = 0;
+
+    for (int color = 0; color < 3; color++) {
+        U64 pieces = node.board[color];
+
+        for (int pos1 = 0; pos1 < BOARD_SIZE; pos1++) {
+            if (pieces & (oneMask << pos1)) {
+                int x1 = pos1 % X;
+                int y1 = pos1 / X;
+
+                for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; pos2++) {
+                    if (pieces & (oneMask << pos2)) {
+                        int x2 = pos2 % X;
+                        int y2 = pos2 / X;
+                        totalDistanceSquared += (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+                    }
+                }
+            }
+        }
+    }
+
+    return totalDistanceSquared;  
+}
+
 
 //Node Dijsktra
 bool NodeDijkstra::operator>(const NodeDijkstra& other) const 
@@ -221,10 +280,23 @@ bool bfs(Board& board)
 }
 
 //Funcionando
-bool astar(Board& board) 
+bool astar(Board& board, int heuristic_type) 
 {
     priority_queue<NodeAStar, vector<NodeAStar>, greater<NodeAStar>> frontier;
     unordered_set<NodeAStar> explored;
+
+    // Selección de la heurística
+    int (*heuristic)(const NodeAStar&) = nullptr;
+    if (heuristic_type == 1) {
+        heuristic = heuristic_manhattan;
+    } else if (heuristic_type == 2) {
+        heuristic = heuristic_euclidean;
+    } else if (heuristic_type == 3) {
+        heuristic = heuristic_costoUniforme;  
+    } else {
+        cerr << "Tipo de heurística inválido. Selecciona entre 1, 2 o 3." << endl;
+        return false;
+    }
 
     NodeAStar startNode = {board.board[RED], board.board[BLUE], board.board[YELLOW], 0, heuristic(startNode), {}};
     frontier.push(startNode);
@@ -244,14 +316,12 @@ bool astar(Board& board)
             break;
         }
 
-        // Generar los movimientos posibles y agregarlos a la cola
         for (int pos1 = 0; pos1 < BOARD_SIZE; ++pos1) 
         {
             for (int pos2 = pos1 + 1; pos2 < BOARD_SIZE; ++pos2) 
             {
                 if (board.areSameColor(pos1, pos2) && board.isPathClear(pos1, pos2) && board.isRectangleClear(pos1, pos2)) {
                     NodeAStar newNode = currentNode;
-                    // Eliminar las fichas en las posiciones
                     for (int i = 0; i < 3; i++) 
                     {
                         if ((newNode.board[i] & (oneMask << pos1)) && (newNode.board[i] & (oneMask << pos2))) 
@@ -262,7 +332,7 @@ bool astar(Board& board)
                     }
                     newNode.moves.push_back({pos1, pos2});
                     newNode.depth++;
-                    newNode.heuristic = heuristic(newNode);
+                    newNode.heuristic = heuristic(newNode);  
 
                     if (explored.find(newNode) == explored.end()) 
                     {
@@ -275,7 +345,7 @@ bool astar(Board& board)
     }
 
     auto end_time = high_resolution_clock::now();
-    auto duration = duration_cast<milliseconds>(end_time - start_time); // Tiempo en milisegundos
+    auto duration = duration_cast<milliseconds>(end_time - start_time); 
     double duration_in_seconds = duration.count() / 1000.0;
 
     cout << "Tiempo total: " << duration_in_seconds << " segundos." << endl;

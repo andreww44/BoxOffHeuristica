@@ -9,7 +9,9 @@
 #include <limits>
 #include "Board.hpp" 
 
-
+const int HEURISTIC_MANHATTAN = 1;
+const int HEURISTIC_EUCLIDEAN = 2;
+const int HEURISTIC_COSTOUNIFORME = 3;
 // Definición de un nodo en la búsqueda
 struct Node {
     U64 board[3];  
@@ -77,8 +79,8 @@ namespace std {
 }
 
 bool bfs(Board& board);  //Búsqueda por amplitud (Breadth-First Search)
-int heuristic(const NodeAStar& node); // Heurística para A*
-bool astar(Board& board); // A* Search
+int heuristic_costoUniforme(const NodeAStar& node); // Heurística para A*
+bool astar(Board& board, int heuristic_type); // A* Search
 bool ida_star(Board& board); // IDA* Search
 int search_ida(Board& board, NodeAStar startNode, int depth, int limit, int& nodesExplored);
 
